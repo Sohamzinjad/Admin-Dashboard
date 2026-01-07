@@ -7,14 +7,16 @@ import Typography from "@mui/material/Typography";
 import { ThemedTitle } from "@refinedev/mui";
 
 import { CredentialResponse } from "../interfaces/google";
+import yariga from "../assets/yariga.svg";
 
-// Todo: Update your Google Client ID here
+// ✅ Google Client ID (Vite-safe)
 const GOOGLE_CLIENT_ID =
   "1041339102270-e1fpe2b6v6u1didfndh7jkjmpcashs4f.apps.googleusercontent.com";
 
 export const Login: React.FC = () => {
   const { mutate: login } = useLogin<CredentialResponse>();
 
+  // 🔹 Google Button Component
   const GoogleButton = () => {
     const divRef = useRef<HTMLDivElement>(null);
 
@@ -23,32 +25,39 @@ export const Login: React.FC = () => {
         return;
       }
 
-      try {
-        window.google.accounts.id.initialize({
-          ux_mode: "popup",
-          client_id: GOOGLE_CLIENT_ID,
-          callback: async (res: CredentialResponse) => {
-            if (res.credential) {
-              login(res);
-            }
-          },
-        });
-        window.google.accounts.id.renderButton(divRef.current, {
-          theme: "filled_blue",
-          size: "medium",
-          type: "standard",
-        });
-      } catch (error) {
-        console.log(error);
-      }
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        ux_mode: "popup",
+        callback: (res: CredentialResponse) => {
+          if (res.credential) {
+            login({
+              credential: res.credential,
+            });
+          }
+        },
+      });
+
+      window.google.accounts.id.renderButton(divRef.current, {
+        theme: "filled_blue",
+        size: "medium",
+        type: "standard",
+      });
     }, []);
 
-    return <div ref={divRef} />;
+    return (
+      <Box
+        ref={divRef}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      />
+    );
   };
 
   return (
     <Container
-      style={{
+      sx={{
         height: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -61,6 +70,12 @@ export const Login: React.FC = () => {
         justifyContent="center"
         flexDirection="column"
       >
+        {/* Logo */}
+        <Box display="flex" justifyContent="center">
+          <img src={yariga} alt="Yariga Logo" width={120} />
+        </Box>
+
+        {/* Title */}
         <ThemedTitle
           collapsed={false}
           wrapperStyles={{
@@ -69,12 +84,14 @@ export const Login: React.FC = () => {
           }}
         />
 
+        {/* Google Sign In Button */}
         <GoogleButton />
 
-        <Typography align="center" color={"text.secondary"} fontSize="12px">
+        {/* Footer */}
+        <Typography align="center" color="text.secondary" fontSize="12px">
           Powered by
           <img
-            style={{ padding: "0 5px" }}
+            style={{ padding: "0 5px", verticalAlign: "middle" }}
             alt="Google"
             src="https://refine.ams3.cdn.digitaloceanspaces.com/superplate-auth-icons%2Fgoogle.svg"
           />
